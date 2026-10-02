@@ -209,6 +209,16 @@
   }
   .backup:hover{color:var(--ink);text-decoration:underline}
   .backup:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  /* 점수판 아래 흐린 글씨가 둘이 되었다: 왼쪽은 담당자용 시트 입력, 오른쪽은 시트가 안 될 때 수동 입력판 */
+  .hang{
+    position:absolute;left:50%;top:100%;
+    transform:translateX(-50%);
+    margin-top:8px;
+    display:flex;align-items:center;gap:2px;
+    white-space:nowrap;
+  }
+  .hang .backup{position:static;transform:none;margin:0}
+  .hang .dot{color:var(--mute);font-size:.85rem;opacity:.6}
 
   /* ── 바닥 잔디 ── */
   /* ── 바닥: 현수막 사람들과 강아지가 잔디와 흰 바탕에 걸쳐 선다 ── */
@@ -235,6 +245,9 @@
   @media (max-width:900px){
     .tools{grid-template-columns:1fr}
     .face{height:clamp(110px,28vw,160px)}
+    /* 좁은 폭에서는 점수판 아래 두 링크를 세로로 쌓는다 */
+    .hang{flex-direction:column;gap:0;white-space:normal}
+    .hang .dot{display:none}
   }
   @media (prefers-reduced-motion:reduce){
     *{transition-duration:.01ms!important}
@@ -276,7 +289,11 @@
           <span class="go">열기</span>
         </div>
       </a>
-      <a class="backup" href="https://jongeunkwon.github.io/score-board/" target="_blank" rel="noopener">시트가 안 될 때 · 수동 입력</a>
+      <div class="hang">
+        <a class="backup" href="https://docs.google.com/spreadsheets/d/1zoowKbJZOiIWOfbqIJbJcW36ReI9OHla6_sA1Sl2lyM/edit" target="_blank" rel="noopener">점수 입력 시트 · 담당자용</a>
+        <span class="dot" aria-hidden="true">·</span>
+        <a class="backup" href="https://jongeunkwon.github.io/score-board/" target="_blank" rel="noopener">시트가 안 될 때 · 수동 입력</a>
+      </div>
     </div>
   </div>
 </main>
