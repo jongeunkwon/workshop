@@ -26,6 +26,11 @@
     --pink:#F1729E;
     --green:#39B54A;
     --yellow:#FFD530;
+    /* 현수막 하늘 띠 3단 — PDF 원본 값 */
+    --sky1:#69B3E3;   /* 가장 진한 띠 — 넓게 펴서 제목 바탕 */
+    --sky2:#9ED2F2;   /* 가운데 띠 — 제목과 본문 사이 경계선 */
+    --sky3:#D4EFFC;   /* 가장 연한 띠 — 제목 아래 셋째 띠 */
+    --pale:#EAF7FE;   /* 페이지 바탕 — 셋째 띠와 흰색의 중간 */
     --gap:clamp(32px,5vh,64px);   /* 카드 묶음 위아래 최소 여백 */
     --hang:19px;                  /* 점수판 카드 아래 매단 텍스트 버튼 자리 — 카드와 버튼을 한 묶음으로 가운데 맞춤 */
     color-scheme:light;
@@ -35,7 +40,7 @@
   html,body{min-height:100%}
   body{
     margin:0;
-    background:var(--paper);
+    background:var(--pale);
     color:var(--ink);
     font-family:"Roboto Flex","Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;
@@ -45,31 +50,43 @@
   /* 카드 묶음을 현수막과 바닥 장면 사이 가운데에 — 위아래 여백이 같다 */
   .wrap{flex:1 0 auto;width:100%;display:flex;flex-direction:column;justify-content:center}
 
-  /* ── 현수막 하늘: 제목은 가운데, NHN 로고는 카드 왼쪽 선에 맞춰 왼쪽 위 (그 자리 구름은 오른쪽으로 옮김) ── */
+  /* ── 하늘: 가장 진한 띠를 넓게 펴고 흰 제목을 가운데 (Figma 「A」 프레임과 같은 처리) ── */
   .hero{
     position:relative;
-    width:100%;
-    aspect-ratio:3200/382;
-    min-height:120px;
-    background:var(--sky) url(assets/sky-bg.png) center/cover no-repeat;
-    image-rendering:pixelated;
+    /* 현수막 하늘 3단을 원본 비율 그대로. 제목은 원본처럼 2·3단 경계에 걸친다 (경계 = 제목 위에서 43%) */
+    --tw:clamp(240px,min(46vw,42vh),900px);
+    --th:calc(var(--tw) / 4.884);   /* 제목 SVG 비율 3546:726 */
+    --pt:calc(var(--th) * 1.2);
+    background:linear-gradient(
+      var(--sky1) 0 calc(var(--pt) - var(--th) * .36),
+      var(--sky2) 0 calc(var(--pt) + var(--th) * .43),
+      var(--sky3) 0);
+    padding:var(--pt) 16px calc(var(--th) * .35);
+    display:grid;place-items:center;
   }
-  /* 로고·제목은 벡터 — 픽셀 그림용 계단 처리를 물려받지 않게 끈다 */
-  .hero img{image-rendering:auto}
+  /* 구름 — 현수막 구름 위치 그대로(왼쪽 구름은 로고 자리를 비워 오른쪽으로 옮김) */
+  .hero .clouds{
+    position:absolute;left:0;right:0;top:1.05vw;
+    width:100%;height:auto;
+    image-rendering:pixelated;
+    pointer-events:none;
+  }
   .hero .title{
-    position:absolute;left:50%;top:50%;
-    width:clamp(220px,25vw,420px);
-    transform:translate(-50%,-50%);
+    position:relative;
+    /* 노트북(세로 약 780px)에서도 바닥 장면까지 한 화면에 — 높이에도 묶는다 */
+    width:var(--tw);height:auto;
+    image-rendering:auto;
   }
   .hero .logo{
     position:absolute;
     /* 카드 묶음(.wrap)의 왼쪽 선과 같은 위치 */
     left:max(16px,calc((100% - 1280px) / 2 + 16px));
-    /* 원본 현수막의 로고 높이와 같은 줄 */
-    top:18.5%;
-    transform:translateY(-50%);
+    top:clamp(16px,2.4vw,32px);
     width:clamp(56px,5vw,80px);
+    image-rendering:auto;
   }
+  /* 가운데 띠 — 현수막과 같은 두께(폭의 4%) */
+  .band{height:clamp(20px,min(4vw,5vh),72px);background:var(--sky2)}
 
   .wrap{
     max-width:1280px;
@@ -107,19 +124,29 @@
   .card{
     --c:var(--sky);
     display:flex;flex-direction:column;
+    position:relative;
     border-radius:20px;
     overflow:hidden;
-    border:1.5px solid var(--line);
     background:var(--paper);
     color:inherit;text-decoration:none;
-    transition:transform .2s,box-shadow .2s,border-color .2s;
+    transition:transform .2s,box-shadow .2s;
   }
-  .card:hover{transform:translateY(-4px);border-color:var(--c);box-shadow:0 12px 0 -4px var(--c)}
+  /* 테두리는 안쪽 선 — 색 면과 흰 면 위에 검정 10%를 덮어 각 면 색과 섞인다 */
+  .card::after{
+    content:"";position:absolute;inset:0;z-index:2;
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px #0000001A;
+    pointer-events:none;
+    transition:box-shadow .2s;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 12px 0 -4px var(--c)}
+  /* 올리면 안쪽 선이 조 색으로 — 색 면과 겹쳐도 그대로 둔다 */
+  .card:hover::after{box-shadow:inset 0 0 0 1.5px var(--c)}
   .card:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
   .face{
     position:relative;
     background:var(--c);
-    aspect-ratio:16/10;
+    height:clamp(120px,22vh,260px);
     display:grid;place-items:center;
     overflow:hidden;
   }
@@ -205,13 +232,9 @@
     image-rendering:pixelated;
   }
 
-  /* 좁은 화면에서는 하늘이 잘려 구름 끝이 로고 옆에 걸린다 — 오른쪽 하늘을 보여준다 */
-  @media (max-width:600px){
-    .hero{background-position:75% center}
-  }
   @media (max-width:900px){
     .tools{grid-template-columns:1fr}
-    .face{aspect-ratio:16/7}
+    .face{height:clamp(110px,28vw,160px)}
   }
   @media (prefers-reduced-motion:reduce){
     *{transition-duration:.01ms!important}
@@ -219,6 +242,7 @@
 </style>
 
 <header class="hero">
+  <img class="clouds" src="assets/clouds.png" alt="">
   <img class="logo" src="assets/nhn.svg" alt="NHN">
   <img class="title" src="assets/title.svg" alt="디자인실 명랑 운동회">
 </header>
